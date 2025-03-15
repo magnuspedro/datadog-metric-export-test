@@ -92,6 +92,9 @@ StatsDClient statsd = newNonBlockingStatsDClientBuilder()
         .build();
 ```
 
+> [!TIP]
+> A bean [configuration](src/main/java/com/magnus/datadog_metrics_test/config/DogStatsDConfig.java) and [configuration properties](src/main/java/com/magnus/datadog_metrics_test/config/DogStatsDProperties.java) were created to use with Spring Boot.
+
 # How to Run
 
 To conduct the experiment, I utilized the free trial DataDog account hosted on the us5 server.
