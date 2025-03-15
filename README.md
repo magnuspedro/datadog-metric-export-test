@@ -2,6 +2,7 @@
 
 When exporting metrics using the micrometer statsd registry under heavy loads, some metrics are missing.
 
+> [!NOTE]
 > **Disclaimer**: This project is a proof of concept and was created to show the best choice for heavy load metrics
 > sending to DataDog with Statsd.
 
