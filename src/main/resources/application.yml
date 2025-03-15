@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: datadog-metrics-test
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  statsd:
+    metrics:
+      export:
+        flavor: datadog
+        enabled: true
+logging:
+  level:
+    io.micrometer: INFO
+    io.netty: INFO
+    com.timgroup.statsd: INFO
+    dogstatsd: INFO
