@@ -2,7 +2,8 @@
 
 When exporting metrics using the micrometer statsd registry under heavy loads, some metrics are missing.
 
-> **Disclaimer**: This project is a proof of concept and was created to show the best choice for heavy load metrics sending to DataDog with Statsd. 
+> **Disclaimer**: This project is a proof of concept and was created to show the best choice for heavy load metrics
+> sending to DataDog with Statsd.
 
 ## Testing With Micrometer
 
@@ -33,7 +34,8 @@ To account for the graphs above, results close to 1 million counts were extrapol
 Parallel usage of the micrometer statsd registry with 10 million counts resulted in approximately 2.65 million counts.
 ![micrometer parallel 10 million](micrometer-10million.png)
 
-Using the dogstatsd library, ten million counts were processed in parallel, resulting in a total of 10 million counts.
+Using the dogstatsd library, ten million counts were processed in parallel, resulting in a total of 10 million counts. (
+The small bar was an attempt with a small queue size)
 ![dogstatsd 10 million](dogstatsd-10million.png)
 
 ### Considerations
@@ -48,6 +50,14 @@ to 10 million "spaces" in memory, but will ensure that all the metrics are going
 Additionally, the dogstatsd metric `datadog.dogstatsd.client.packets_dropped_queue` can be used to monitor the number of
 messages dropped from the queue. This metric is exported to Datadog, allowing the creation of an alarm to track the
 number of dropped messages.
+
+#### Properties
+
+The properties that helped the most to increase performance were:
+- queueSize
+- senderWorkers
+- aggregationShards
+- aggregationFlushInterval
 
 ### Configuration
 

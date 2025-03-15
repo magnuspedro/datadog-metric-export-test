@@ -15,6 +15,7 @@ management:
         sender-workers: 15
         aggregation-shards: 8
         aggregation-flush-interval: 2_000
+        constant-tags: "env:dev,app:datadog-metrics-test"
 logging:
   level:
     io.micrometer: INFO
