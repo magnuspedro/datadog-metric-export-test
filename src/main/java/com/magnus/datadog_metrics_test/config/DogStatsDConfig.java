@@ -1,5 +1,6 @@
 package com.magnus.datadog_metrics_test.config;
 
+import com.timgroup.statsd.NoOpStatsDClient;
 import com.timgroup.statsd.NonBlockingStatsDClientBuilder;
 import com.timgroup.statsd.StatsDClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,9 @@ public class DogStatsDConfig {
 
     @Bean
     public StatsDClient dogStatsDClient(DogStatsDProperties dogStatsDProperties, @Value("${spring.threads.virtual.enabled:false}") boolean virtualThreadsEnabled) {
+        if (!dogStatsDProperties.isEnabled()) {
+            return new NoOpStatsDClient();
+        }
         var client = new NonBlockingStatsDClientBuilder()
                 .maxPacketSizeBytes(dogStatsDProperties.getMaxPacketSizeBytes())
                 .port(dogStatsDProperties.getPort())

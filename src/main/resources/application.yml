@@ -11,11 +11,17 @@ management:
       export:
         flavor: datadog
         enabled: true
-        queue-size: 6_500_000
+  dogstatsd:
+    metrics:
+      export:
+        enabled: true
+        queue-size: 5_000_000
         sender-workers: 15
-        aggregation-shards: 8
-        aggregation-flush-interval: 2_000
-        constant-tags: "env:dev,app:datadog-metrics-test"
+        aggregation-shards: 1
+        aggregation-flush-interval: 3_000
+        tags:
+          env: dev
+          app: datadog-metrics-test
 logging:
   level:
     io.micrometer: INFO

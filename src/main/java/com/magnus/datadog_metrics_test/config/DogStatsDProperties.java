@@ -6,12 +6,14 @@ import com.timgroup.statsd.Telemetry;
 import lombok.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@ConfigurationProperties(prefix = "management.statsd.metrics.export")
+@ConfigurationProperties(prefix = "management.dogstatsd.metrics.export")
 public class DogStatsDProperties {
     private int maxPacketSizeBytes = 0;
     private int port = NonBlockingStatsDClient.DEFAULT_DOGSTATSD_PORT;
@@ -36,5 +38,13 @@ public class DogStatsDProperties {
     private String namedPipe;
     private String entityID;
     private String containerID;
-    private String[] constantTags;
+    private Map<String, String> tags;
+    private boolean enabled = true;
+
+    public String[] getConstantTags() {
+        return tags.entrySet().stream()
+                .filter(e -> e.getKey() != null && e.getValue() != null)
+                .map(e -> e.getKey() + ":" + e.getValue())
+                .toArray(String[]::new);
+    }
 }
