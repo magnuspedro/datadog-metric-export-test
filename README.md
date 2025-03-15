@@ -45,6 +45,7 @@ exceeds the queue’s capacity, it will be discarded.
 For the 10 million count test, I used a queue of size 10 million, which is not recommended because it will allocate up
 to 10 million "spaces" in memory, but will ensure that all the metrics are going to be sent.
 
+> [!IMPORTANT]
 > The queue size depends on the available memory and the number of metrics generated per flush.
 
 Additionally, the dogstatsd metric `datadog.dogstatsd.client.packets_dropped_queue` can be used to monitor the number of
