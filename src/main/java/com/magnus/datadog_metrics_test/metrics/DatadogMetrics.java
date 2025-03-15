@@ -1,6 +1,5 @@
 package com.magnus.datadog_metrics_test.metrics;
 
-import com.timgroup.statsd.NonBlockingStatsDClientBuilder;
 import com.timgroup.statsd.StatsDClient;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
@@ -17,28 +16,24 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class DatadogMetrics {
     private final MeterRegistry meterRegistry;
+    private final StatsDClient statsDClient;
 
     public void incrementCounterMicrometer(ContextRefreshedEvent event) {
-        log.info("Strating count increment to send 1 million metrics to Datadog");
-        IntStream.range(0, 1000000).parallel().forEach(i -> meterRegistry.counter("test.counter.million").increment());
-        log.info("Finished count increment to send 1 million metrics to Datadog");
+        var instant = new StopWatch();
+        log.info("Start sending Micrometer StatsD");
+        instant.start();
+        IntStream.range(0, 1_000_000_0).parallel().forEach(i -> meterRegistry.counter("test.counter.million").increment());
+        instant.stop();
+        log.info("Finished sending in {} ms Micrometer StatsD", instant.getTotalTimeMillis());
     }
 
     @EventListener
     public void incrementCounterDogStatsd(ContextRefreshedEvent event) {
         var instant = new StopWatch();
-        log.info("Start sending");
+        log.info("Start sending DogStatsD");
         instant.start();
-        StatsDClient statsd = new NonBlockingStatsDClientBuilder()
-                .prefix("statsd")
-                .hostname("localhost")
-                .port(8125)
-                .queueSize(550000)
-                .senderWorkers(10)
-                .threadFactory(Thread.ofVirtual().factory())
-                .build();
-        IntStream.range(0, 1000000).parallel().forEach(i -> statsd.increment("test.counter.datadog.statsd.million"));
+        IntStream.range(0, 1_000_000_0).parallel().forEach(i -> statsDClient.increment("test.counter.datadog.statsd.million"));
         instant.stop();
-        log.info("Finished sending in {} ms", instant.getTotalTimeMillis());
+        log.info("Finished sending in {} ms DogStatsD", instant.getTotalTimeMillis());
     }
 }

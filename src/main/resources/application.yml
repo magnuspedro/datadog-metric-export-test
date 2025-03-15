@@ -11,6 +11,10 @@ management:
       export:
         flavor: datadog
         enabled: true
+        queue-size: 6_500_000
+        sender-workers: 15
+        aggregation-shards: 8
+        aggregation-flush-interval: 2_000
 logging:
   level:
     io.micrometer: INFO
