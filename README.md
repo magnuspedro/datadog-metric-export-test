@@ -8,6 +8,20 @@ with Statsd.
 > [!IMPORTANT]
 > The methods employed for testing were not entirely accurate in accordance with the scientific convention.
 
+# Table of Contents
+
+1. [Testing With Micrometer](#testing-with-micrometer)
+2. [Testing With Dogstatsd](#testing-with-dogstatsd)
+    1. [Configuration](#configuration)
+3. [Testing Extrapolation](#testing-extrapolation)
+4. [Considerations](#considerations)
+5. [Memory Usage](#memory-usage)
+    1. [Test Environment](#test-environment)
+    2. [Results](#results)
+6. [How to Run](#how-to-run)
+    1. [DataDog Agent](#datadog-agent)
+    2. [Spring Boot Application](#spring-boot-application)
+
 ## Testing With Micrometer
 
 In the test scenario, 1 million counts were sent to Datadog through micrometer statsd.
@@ -29,6 +43,39 @@ To address this issue, the dogstatsd library was employed to transmit the metric
 adjustments, it successfully sent 1 million counts without any data loss.
 
 ![dogstatsd](dogstatsd.png)
+
+### Configuration
+
+A few configurations managed to achieve the 1 million count threshold.
+
+The most crucial configuration is the queueSize, which serves as a buffer to store metrics that have been processed but
+not yet sent.
+
+```java
+StatsDClient statsd = newNonBlockingStatsDClientBuilder()
+        .prefix("statsd")
+        .hostname("localhost")
+        .port(8125)
+        .queueSize(650000)
+        .build();
+```
+
+When the queueSize is set to around 650k, it was able to send 1 million counts without losing most of the metrics.
+
+To further optimize performance, additional tests were conducted with more than one senderWorkers using threads. In this
+scenario, 10 was the optimal value for senderWorkers. Notably, virtual threads proved to be significantly more efficient
+compared to system threads.
+
+```java
+StatsDClient statsd = newNonBlockingStatsDClientBuilder()
+        .prefix("statsd")
+        .hostname("localhost")
+        .port(8125)
+        .queueSize(550000)
+        .senderWorkers(10)
+        .threadFactory(Thread.ofVirtual().factory())
+        .build();
+```
 
 ## Testing Extrapolation
 
@@ -93,38 +140,6 @@ less memory.
 
 On both libraries the GC is was able to clean the heap after all metrics were sent.
 
-### Configuration
-
-A few configurations managed to achieve the 1 million count threshold.
-
-The most crucial configuration is the queueSize, which serves as a buffer to store metrics that have been processed but
-not yet sent.
-
-```java
-StatsDClient statsd = newNonBlockingStatsDClientBuilder()
-        .prefix("statsd")
-        .hostname("localhost")
-        .port(8125)
-        .queueSize(650000)
-        .build();
-```
-
-When the queueSize is set to around 650k, it was able to send 1 million counts without losing most of the metrics.
-
-To further optimize performance, additional tests were conducted with more than one senderWorkers using threads. In this
-scenario, 10 was the optimal value for senderWorkers. Notably, virtual threads proved to be significantly more efficient
-compared to system threads.
-
-```java
-StatsDClient statsd = newNonBlockingStatsDClientBuilder()
-        .prefix("statsd")
-        .hostname("localhost")
-        .port(8125)
-        .queueSize(550000)
-        .senderWorkers(10)
-        .threadFactory(Thread.ofVirtual().factory())
-        .build();
-```
 
 > [!TIP]
 > A bean [configuration](src/main/java/com/magnus/datadog_metrics_test/config/DogStatsDConfig.java)
