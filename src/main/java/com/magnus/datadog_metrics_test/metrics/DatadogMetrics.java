@@ -18,7 +18,7 @@ public class DatadogMetrics {
     private final MeterRegistry meterRegistry;
     private final StatsDClient statsDClient;
 
-    public void incrementCounterMicrometer(ContextRefreshedEvent event) {
+    public void incrementCounterMicrometer() {
         var instant = new StopWatch();
         log.info("Start sending Micrometer StatsD");
         instant.start();
@@ -27,8 +27,7 @@ public class DatadogMetrics {
         log.info("Finished sending in {} ms Micrometer StatsD", instant.getTotalTimeMillis());
     }
 
-    @EventListener
-    public void incrementCounterDogStatsd(ContextRefreshedEvent event) {
+    public void incrementCounterDogStatsd() {
         var instant = new StopWatch();
         log.info("Start sending DogStatsD");
         instant.start();

@@ -15,12 +15,12 @@ management:
     metrics:
       export:
         enabled: true
-        queue-size: 5_000_000
+        queue-size: 1_000_000_0
         sender-workers: 15
         aggregation-shards: 1
         aggregation-flush-interval: 3_000
         tags:
-          env: dev
+          env: hom
           app: datadog-metrics-test
 logging:
   level:

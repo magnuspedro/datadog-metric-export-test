@@ -4,7 +4,7 @@ When exporting metrics using the micrometer statsd registry under heavy loads, s
 
 > [!NOTE]
 > **Disclaimer**: This project is a proof of concept and was created to show the best choice for heavy load metrics
-> sending to DataDog with Statsd.
+> sending to DataDog with Statsd. The methods employed for testing were not entirely accurate in accordance with the scientific convention.
 
 ## Testing With Micrometer
 
@@ -39,7 +39,7 @@ Using the dogstatsd library, ten million counts were processed in parallel, resu
 The small bar was an attempt with a small queue size)
 ![dogstatsd 10 million](dogstatsd-10million.png)
 
-### Considerations
+# Considerations
 
 When using the dogstatsd library, it’s crucial to understand that the library relies on the queue size. If a metric
 exceeds the queue’s capacity, it will be discarded.
@@ -56,10 +56,40 @@ number of dropped messages.
 #### Properties
 
 The properties that helped the most to increase performance were:
+
 - queueSize
 - senderWorkers
 - aggregationShards
 - aggregationFlushInterval
+
+## Memory Usage
+
+Comparing the memory usage fo the two libraries.
+
+### Test Environment
+
+When conducting the experiment to measure memory usage, the JVM Heap usage was recorded. Initially, right after
+launching the application, the Heap usage was observed to be between 24 to 50 MB. The available memory was set to 2 GB.
+
+Considering that the application’s sole purpose is to send metrics to DataDog and maintain the web server’s
+functionality, it is reasonable to expect such low memory usage during the initialization phase.
+
+To be fair, the DogStatsD experiment used the worst-case scenario. The queue size was set to 10 million to be able to
+accommodate all metrics waiting to be sent. The default parameters were used for the Micrometer statsd.
+
+### Results
+
+The table below shows the memory usage for both libraries.
+
+| Library    | Memory Usage |
+|------------|--------------|
+| Micrometer | ~1 GB        |
+| DogStatsD  | ~850 MB      |
+
+The memory usage on both devices is quite similar, even though DogStatsD has a large queue size, it still manages to use
+less memory.
+
+On both libraries the GC is was able to clean the heap after all metrics were sent.
 
 ### Configuration
 
@@ -95,7 +125,9 @@ StatsDClient statsd = newNonBlockingStatsDClientBuilder()
 ```
 
 > [!TIP]
-> A bean [configuration](src/main/java/com/magnus/datadog_metrics_test/config/DogStatsDConfig.java) and [configuration properties](src/main/java/com/magnus/datadog_metrics_test/config/DogStatsDProperties.java) were created to use with Spring Boot.
+> A bean [configuration](src/main/java/com/magnus/datadog_metrics_test/config/DogStatsDConfig.java)
+> and [configuration properties](src/main/java/com/magnus/datadog_metrics_test/config/DogStatsDProperties.java) were
+> created to use with Spring Boot.
 
 # How to Run
 
@@ -123,6 +155,14 @@ Alternatively, it can be managed using the [docker-compose](docker-compose.yml) 
 
 ## Spring Boot Application
 
-To switch the library that will be used, simply modify the `@EventListener` annotation to correspond to the desired
-method in the [DataDogMetrics](src/main/java/com/magnus/datadog_metrics_test/metrics/DatadogMetrics.java) class.
+To create a metric simply make a POST call:
+
+- For micrometer use the addresss http://localhost:8080/micrometer
+- For dogstatsd use the addresss http://localhost:8080/dogstatsd
+
+The metrics real call are on
+the [DataDogMetrics](src/main/java/com/magnus/datadog_metrics_test/metrics/DatadogMetrics.java) class.
+
+> [!NOTE]
+> The class in configured to send 10 million counts.
 
